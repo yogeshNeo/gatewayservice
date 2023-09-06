@@ -1,0 +1,67 @@
+server:
+  port: 9090
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+spring:
+  application:
+    name: GATEWAY-SERVICE
+  cloud:
+    gateway:
+      routes:
+        - id: ORDER-SERVICE
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ORDER-SERVICE
+                fallbackuri: forward:/orderServiceFallback
+
+        - id: PAYMENT-SERVICE
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payment/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: PAYMENT-SERVICE
+                fallbackuri: forward:/paymentServiceFallback
+
+        - id: INVENTORY-SERVICE  
+          uri: lb://INVENTORY-SERVICE
+          predicates:         
+            - Path=/inventory/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: INVENTORY-SERVICE
+                fallbackuri: forward:/inventoryServiceFallback
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  retry:
+    instances:
+      myRetry:
+        max-attempts: 3
+        wait-duration: 5s      
