@@ -1,0 +1,30 @@
+version: '3.7'
+
+networks:
+  redis-cluster-compose:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 182.17.0.0/16
+
+services:
+
+  eureka:
+    image: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      redis-cluster-compose:
+        ipv4_address: 182.17.0.10
+
+  api-gateway:
+    image: api-gateway
+    ports:
+      - "9090:9090"
+    depends_on:
+      - eureka
+    restart: always
+    networks:
+      redis-cluster-compose:
+        ipv4_address: 182.17.0.11
+        

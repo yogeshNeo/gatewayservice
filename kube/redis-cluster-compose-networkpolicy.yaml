@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: null
+  name: redis-cluster-compose
+  namespace: default
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          io.kompose.network/redis-cluster-compose: "true"
+  podSelector:
+    matchLabels:
+      io.kompose.network/redis-cluster-compose: "true"
+    
